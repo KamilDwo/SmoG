@@ -21,13 +21,27 @@ class Map extends React.PureComponent {
         }
     }
 
+    popupStyle = (address, indexes) => {
+        return `<h3>${address}</h3>
+        <div class="indicator" style="color:${indexes.color}">${Math.round(indexes.value)}</div>
+        ${indexes.advice}`
+    }
+
+    popupStyleError = (address) => {
+        return `<h3>${address}</h3>
+        Ten czujnik jest aktualnie nieaktywny.`
+    }
+
     onMarkerClick = (marker) => {
         const { options } = marker.target
 
         axios.get(`https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI&lat=${options.location.lat}6&lng=${options.location.lng}&apikey=${apiKey}`)
         .then(({ data }) => {
-            console.log(data)
-            marker.target.bindPopup(options.address).openPopup()
+            if(data.current.indexes[0] && data.current.indexes[0].value){
+                marker.target.bindPopup(this.popupStyle(options.address, data.current.indexes[0])).openPopup()
+            } else {
+                marker.target.bindPopup(this.popupStyleError(options.address)).openPopup()
+            }
         })
         .catch((err) => { 
             console.log(err) 
@@ -70,6 +84,8 @@ class Map extends React.PureComponent {
                 let marker = L.marker([point.location.latitude, point.location.longitude], {
                     icon: greenIcon,
                     address: point.address.displayAddress2,
+                    maxWidth: 200,
+                    minWidth: 200,
                     location: {
                         lat: point.location.latitude,
                         lng: point.location.longitude

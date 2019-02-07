@@ -12,6 +12,14 @@ body {
 const StyledMap = styled.div `
 width: 100%;
 height: 100vh;
+.indicator{
+    display: block;
+    margin: 10px 0;
+    width: 100%;
+    font-size: 30px;
+    text-align: center;
+    font-weight: bolder;
+}
 `
 
 

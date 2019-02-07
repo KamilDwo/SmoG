@@ -5,11 +5,7 @@ import './styles/Leaflet.css'
 import {GlobalStyle} from './styles/Style'
 
 class App extends React.Component {
-    state = {
-    }
-
     render() {
-
         return (<>
             <GlobalStyle/>
             <Map/>
