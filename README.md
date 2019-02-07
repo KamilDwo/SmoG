@@ -1,9 +1,12 @@
-SmoG - Air quality in Cracow
+**SmoG - Air quality in Cracow**
 
-Git clone https://github.com/KamilDwo/SmoG.git
 
-cd SmoG
+---
 
-npm install
+1. Git clone https://github.com/KamilDwo/SmoG.git
 
-npm run
+2. cd SmoG
+
+3. npm install
+
+4. npm start
