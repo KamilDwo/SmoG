@@ -119,7 +119,7 @@ class Panel extends React.PureComponent {
             title="Loading"
             placement="left"
             closable={true}
-            width={'30vw'}
+            width={'400px'}
             mask={false}
             onClose={this.onClose}
             visible={drawerVisible}>   

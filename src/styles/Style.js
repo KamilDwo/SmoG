@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { createGlobalStyle } from 'styled-components'
-import { Drawer } from 'antd'
+import { Drawer, Select } from 'antd'
 
 const GlobalStyle = createGlobalStyle`
 body {
@@ -22,6 +22,17 @@ height: 100vh;
     font-weight: bolder;
 }`
 
+const StyledRightbar = styled(Select)`
+&&{
+    position: fixed;
+    right: 24px;
+    top: 24px;
+    z-index: 401;
+    @media (max-width: 650px){
+        right: 54px;
+    }
+}`
+
 const StyledDrawer = styled(Drawer)`
 &&{
     .ant-drawer-content{
@@ -39,6 +50,16 @@ const StyledDrawer = styled(Drawer)`
     &.ant-drawer-open{
         .ant-drawer-content-wrapper{
             box-shadow: none;
+            @media (max-width: 650px){
+                width: calc(100% - 30px) !important;
+                margin-top: 75px;
+                padding-bottom: 75px;
+            }
+        }
+        .ant-drawer-body{
+            @media (max-width: 650px){
+                padding-top: 0;
+            }
         }
     }
     .chart-title{
@@ -53,6 +74,7 @@ const StyledDrawer = styled(Drawer)`
         user-select: none;
         cursor: default;
         margin-bottom: 24px;
+        box-shadow: 0 0 10px rgba(40,99,177,.2);
         &.coloured{
             color: #fff;
         }
@@ -72,6 +94,7 @@ const StyledDrawer = styled(Drawer)`
 export {
     GlobalStyle,
     StyledMap,
-    StyledDrawer
+    StyledDrawer,
+    StyledRightbar
 }
   

@@ -1,10 +1,11 @@
 import React from 'react'
 import L from 'leaflet'
-import {StyledMap} from './styles/Style.js'
+import { StyledMap } from './styles/Style.js'
 import axios from 'axios'
 import 'antd/dist/antd.css'
 import StoredPanel from './components/Panel'
 import { connect } from 'react-redux'
+import StoredRightpanel from './components/Rightpanel'
 
 let greenIcon = L.icon({
     iconUrl: 'images/marker-icon.png',
@@ -68,8 +69,8 @@ class Map extends React.PureComponent {
                 console.log(err) 
             })
         } else {
-            let sensorIndex = sensorsList.findIndex(function(person) {
-                return person.id === options.installationId
+            let sensorIndex = sensorsList.findIndex(function(sensor) {
+                return sensor.id === options.installationId
             })
             if(sensorIndex){
                 this.props.onShowDrawer({ 
@@ -134,7 +135,11 @@ class Map extends React.PureComponent {
     }
 
     render() {
-        return <><StyledMap id="map" ref={this.mapRef}/><StoredPanel/></>
+        return <>
+            <StoredRightpanel mapObject={this.mapElement}/>
+            <StyledMap id="map" ref={this.mapRef}/>
+            <StoredPanel/>            
+        </>
     }
 }
 
