@@ -39,8 +39,14 @@ const StyledDrawer = styled(Drawer)`
     &.ant-drawer-open{
         .ant-drawer-content-wrapper{
             box-shadow: none;
-            height: auto;
         }
+    }
+    .chart-title{
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
     }
     .ant-card {
         border-radius: 10px;
