@@ -1,17 +1,11 @@
 import React from 'react'
 import { render } from 'react-dom'
-import Map from './Map'
+import StoredMap from './Map'
 import './styles/Leaflet.css'
 import {GlobalStyle} from './styles/Style'
+import * as serviceWorker from './serviceWorker'
+import store from './store/Store'
+import { Provider } from 'react-redux'
 
-class App extends React.Component {
-    render() {
-        return (<>
-            <GlobalStyle/>
-            <Map/>
-        </>
-    )
-  }
-}
-
-render(<App />, document.getElementById('root'))
+render(<Provider store={ store }><GlobalStyle/><StoredMap /></Provider>, document.getElementById('root'))
+serviceWorker.register()

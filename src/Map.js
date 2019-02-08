@@ -2,6 +2,9 @@ import React from 'react'
 import L from 'leaflet'
 import {StyledMap} from './styles/Style.js'
 import axios from 'axios'
+import 'antd/dist/antd.css'
+import StoredPanel from './components/Panel'
+import { connect } from 'react-redux'
 
 let greenIcon = L.icon({
     iconUrl: 'images/marker-icon.png',
@@ -17,7 +20,7 @@ class Map extends React.PureComponent {
         this.mapRef = React.createRef()
         this.state = {
             avaiblePoints: [],
-            popupLoaded: false
+            drawer: false
         }
     }
 
@@ -35,13 +38,13 @@ class Map extends React.PureComponent {
     onMarkerClick = (marker) => {
         const { options } = marker.target
 
-        axios.get(`https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI&lat=${options.location.lat}6&lng=${options.location.lng}&apikey=${apiKey}`)
+        this.mapElement.flyTo([options.location.lat, options.location.lng], 15)
+        axios.get(`https://airapi.airly.eu/v2/installations/${options.installationId}?apikey=${apiKey}`)
         .then(({ data }) => {
-            if(data.current.indexes[0] && data.current.indexes[0].value){
-                marker.target.bindPopup(this.popupStyle(options.address, data.current.indexes[0])).openPopup()
-            } else {
-                marker.target.bindPopup(this.popupStyleError(options.address)).openPopup()
-            }
+            this.props.onShowDrawer({ 
+                drawerVisible: true,
+                pointData: data
+            })
         })
         .catch((err) => { 
             console.log(err) 
@@ -60,6 +63,8 @@ class Map extends React.PureComponent {
                 })
             ]
         }) 
+        this.mapElement.zoomControl.remove()
+        L.control.zoom({ position: 'bottomright' }).addTo(this.mapElement)
         
         axios.get(`https://airapi.airly.eu/v2/installations/nearest?lat=50.049683&lng=19.944544&maxDistanceKM=30&maxResults=-1&apikey=${apiKey}`)
         .then(({ data }) => {
@@ -70,7 +75,7 @@ class Map extends React.PureComponent {
         })
         .catch((err) => { 
             console.log(err) 
-        })    
+        })  
     }
 
     componentDidUpdate(){
@@ -86,6 +91,7 @@ class Map extends React.PureComponent {
                     address: point.address.displayAddress2,
                     maxWidth: 200,
                     minWidth: 200,
+                    installationId: point.id,
                     location: {
                         lat: point.location.latitude,
                         lng: point.location.longitude
@@ -98,8 +104,20 @@ class Map extends React.PureComponent {
     }
 
     render() {
-        return <StyledMap id="map" ref={this.mapRef}/>
+        return <><StyledMap id="map" ref={this.mapRef}/><StoredPanel/></>
     }
 }
 
-export default Map
+const mapStateToProps = state => (state)
+
+const mapDispatchToProps = dispatch => ({
+    onShowDrawer: (drawer) => {
+        dispatch({
+            type: 'SHOW_DRAWER',
+            payload: drawer
+        })
+    }
+})
+
+const StoredMap = connect(mapStateToProps, mapDispatchToProps)(Map)
+export default StoredMap
