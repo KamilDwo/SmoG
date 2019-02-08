@@ -5,7 +5,7 @@ import axios from 'axios'
 import { StyledDrawer } from '../styles/Style'
 import { Card } from 'antd'
 
-const apiKey = 'dAhLeikoBeIHkdK7NjcYiLI2UrUjDloC'
+const apiKey = 'RpCwq0GvuDZChatIBURhGTvmmK4ek4EZ'
 
 class Panel extends React.PureComponent {  
     constructor(props){
@@ -26,57 +26,65 @@ class Panel extends React.PureComponent {
         const { pointData, drawerVisible } = this.props
         const { pointValues } = this.state
         let box1
-/*
-        if(pointid){
-            axios.get(`https://airapi.airly.eu/v2/installations/${pointid}?apikey=${apiKey}`)
-            .then(({ data }) => {
-                this.setState({
-                    ...this.state,
-                    point: data
-                })
-            })
-            .catch((err) => { 
-                console.log(err) 
-            })
-            /*
-            axios.get(`https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI&lat=${pointLocation.lat}6&lng=${pointLocation.lng}&apikey=${apiKey}`)
-            .then(({ data }) => {
-                this.setState({
-                    ...this.state,
-                    pointValues: data
-                })
-            })
-            .catch((err) => { 
-                console.log(err) 
-            })
-        }*/
-     
-        if(pointValues ){
-            box1 = <Card
-                title={pointData.address.displayAddress2}
-                size="small"
-                extra={<span className="card-close" onClick={this.onClose}>Close</span>}>
-                    <div className="indicator" style={{color: pointValues.current.indexes[0].color}}>
-                        {Math.round(pointValues.current.indexes[0].value)}
-                    </div>
-                    {pointValues.current.indexes[0].description}
-                    <br/>
-                    {pointValues.current.indexes[0].advice}
-                </Card>    
-        }  
+        let sensorsList = JSON.parse(localStorage.getItem('sensors_values'))
         
         if(pointData){
-            axios.get(`https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI&lat=${pointData.location.latitude}&lng=${pointData.location.longitude}&apikey=${apiKey}`)
-            .then(({ data }) => {
-                if(!this.state.pointValues){
-                    this.setState({
-                        pointValues: data
-                    })
+            let sensorExists = false
+            let sensorIndex = sensorsList.findIndex(function(sensor) {
+                return sensor.id === pointData.id
+            })
+            
+            if(sensorIndex >= 0){
+                box1 = <Card
+                    title={pointData.address.displayAddress2}
+                    size="small"
+                    extra={<span className="card-close" onClick={this.onClose}>Close</span>}>
+                        <div className="indicator" style={{color: sensorsList[sensorIndex].data.current.indexes[0].color}}>
+                            {Math.round(sensorsList[sensorIndex].data.current.indexes[0].value)}
+                        </div>
+                        {sensorsList[sensorIndex].data.current.indexes[0].description}
+                        <br/>
+                        {sensorsList[sensorIndex].data.current.indexes[0].advice}
+                    </Card>  
+            } else if(pointValues) {
+                box1 = <Card
+                    title={pointData.address.displayAddress2}
+                    size="small"
+                    extra={<span className="card-close" onClick={this.onClose}>Close</span>}>
+                        <div className="indicator" style={{color: pointValues.current.indexes[0].color}}>
+                            {Math.round(pointValues.current.indexes[0].value)}
+                        </div>
+                        {pointValues.current.indexes[0].description}
+                        <br/>
+                        {pointValues.current.indexes[0].advice}
+                    </Card>  
+            }
+
+            sensorsList.forEach(function (item, key) {
+                if(item && item.id && item.id === pointData.id){
+                    sensorExists = true
                 }
             })
-            .catch((err) => { 
-                console.log(err) 
-            })
+
+            if(!pointValues){
+                if(!sensorExists){
+                    axios.get(`https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI&lat=${pointData.location.latitude}&lng=${pointData.location.longitude}&apikey=${apiKey}`)
+                    .then(({ data }) => {
+                        sensorsList.push({
+                            id: pointData.id,
+                            data: data
+                        })
+                        localStorage.setItem('sensors_values', JSON.stringify(sensorsList))
+                        this.setState({
+                            ...this.state,
+                            pointValues: data
+                        })
+                    })
+                    .catch((err) => { 
+                        console.log(err) 
+                    })
+                }
+            }
         }
 
         return <StyledDrawer

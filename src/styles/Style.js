@@ -43,7 +43,9 @@ const StyledDrawer = styled(Drawer)`
         }
     }
     .ant-card {
-        border-radius: 15px;
+        border-radius: 10px;
+        user-select: none;
+        cursor: default;
     }
     .card-close{
         cursor: pointer;

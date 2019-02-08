@@ -12,7 +12,14 @@ let greenIcon = L.icon({
     popupAnchor:  [-12, -40]
 })
 
-const apiKey = 'dAhLeikoBeIHkdK7NjcYiLI2UrUjDloC'
+const apiKey = 'RpCwq0GvuDZChatIBURhGTvmmK4ek4EZ'
+
+if(!localStorage.getItem('sensors')){
+    localStorage.setItem('sensors', '[]')
+}
+if(!localStorage.getItem('sensors_values')){
+    localStorage.setItem('sensors_values', '[]')
+}
 
 class Map extends React.PureComponent {  
     constructor(props) {
@@ -37,18 +44,40 @@ class Map extends React.PureComponent {
 
     onMarkerClick = (marker) => {
         const { options } = marker.target
+        let sensorsList = JSON.parse(localStorage.getItem('sensors'))
+        let sensorExists = false
+
+        sensorsList.forEach(function (item, key) {
+            if(item && item.id && item.id === options.installationId){
+                sensorExists = true
+            }
+        })
 
         this.mapElement.flyTo([options.location.lat, options.location.lng], 15)
-        axios.get(`https://airapi.airly.eu/v2/installations/${options.installationId}?apikey=${apiKey}`)
-        .then(({ data }) => {
-            this.props.onShowDrawer({ 
-                drawerVisible: true,
-                pointData: data
+        if(!sensorExists){
+            axios.get(`https://airapi.airly.eu/v2/installations/${options.installationId}?apikey=${apiKey}`)
+            .then(({ data }) => {
+                this.props.onShowDrawer({ 
+                    drawerVisible: true,
+                    pointData: data
+                })            
+                sensorsList.push(data)
+                localStorage.setItem('sensors', JSON.stringify(sensorsList))
             })
-        })
-        .catch((err) => { 
-            console.log(err) 
-        })
+            .catch((err) => { 
+                console.log(err) 
+            })
+        } else {
+            let sensorIndex = sensorsList.findIndex(function(person) {
+                return person.id === options.installationId
+            })
+            if(sensorIndex){
+                this.props.onShowDrawer({ 
+                    drawerVisible: true,
+                    pointData: sensorsList[sensorIndex]
+                })    
+            }
+        }
     }
 
     componentDidMount() {
@@ -97,6 +126,7 @@ class Map extends React.PureComponent {
                         lng: point.location.longitude
                     }
                 }).addTo(this.mapElement)
+                marker.bindTooltip(point.address.displayAddress2, { direction: 'top', offset:[-12, -28] })
                 marker.on('click', this.onMarkerClick)
                 return marker
             })
