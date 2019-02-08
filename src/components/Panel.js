@@ -3,7 +3,7 @@ import 'antd/dist/antd.css'
 import { connect } from 'react-redux'
 import axios from 'axios'
 import { StyledDrawer } from '../styles/Style'
-import { Card } from 'antd'
+import { Card, Avatar } from 'antd'
 
 const apiKey = 'RpCwq0GvuDZChatIBURhGTvmmK4ek4EZ'
 
@@ -12,6 +12,12 @@ class Panel extends React.PureComponent {
         super(props)
         this.state = {
             pointValues: null
+        }
+        if(this.props.pointValues){
+            this.props.onStorageAdd({ 
+                ...this.props,
+                pointValues: null
+            })  
         }
     }
 
@@ -23,9 +29,8 @@ class Panel extends React.PureComponent {
     }
 
     render() {
-        const { pointData, drawerVisible } = this.props
-        const { pointValues } = this.state
-        let box1
+        const { pointData, drawerVisible, pointValues } = this.props
+        let box1, box2
         let sensorsList = JSON.parse(localStorage.getItem('sensors_values'))
         
         if(pointData){
@@ -34,31 +39,34 @@ class Panel extends React.PureComponent {
                 return sensor.id === pointData.id
             })
             
-            if(sensorIndex >= 0){
+            if(sensorIndex >= 0 || pointValues){
+                //const preParam = (sensorsList[sensorIndex] ? sensorsList[sensorIndex].data : pointValues)
+                const preParam2 = (sensorsList[sensorIndex] ? sensorsList[sensorIndex].data.current.indexes[0] : pointValues.current.indexes[0])
+
                 box1 = <Card
                     title={pointData.address.displayAddress2}
                     size="small"
                     extra={<span className="card-close" onClick={this.onClose}>Close</span>}>
-                        <div className="indicator" style={{color: sensorsList[sensorIndex].data.current.indexes[0].color}}>
-                            {Math.round(sensorsList[sensorIndex].data.current.indexes[0].value)}
+                        <div className="avatar-logo">
+                            <Avatar src={pointData.sponsor.logo} size="large"/>
                         </div>
-                        {sensorsList[sensorIndex].data.current.indexes[0].description}
-                        <br/>
-                        {sensorsList[sensorIndex].data.current.indexes[0].advice}
+                        {pointData.sponsor.description} <b>{pointData.sponsor.name}</b>                        
                     </Card>  
-            } else if(pointValues) {
-                box1 = <Card
-                    title={pointData.address.displayAddress2}
+                box2 = <Card 
                     size="small"
-                    extra={<span className="card-close" onClick={this.onClose}>Close</span>}>
-                        <div className="indicator" style={{color: pointValues.current.indexes[0].color}}>
-                            {Math.round(pointValues.current.indexes[0].value)}
-                        </div>
-                        {pointValues.current.indexes[0].description}
+                    className="coloured"
+                    style={{ 
+                        backgroundColor: preParam2.color, 
+                        borderColor: preParam2.color, 
+                    }}>
+                        <div className="indicator">
+                            {Math.round(preParam2.value)}
+                        </div>                        
+                        {preParam2.description}
                         <br/>
-                        {pointValues.current.indexes[0].advice}
-                    </Card>  
-            }
+                        {preParam2.advice}
+                </Card>  
+            } 
 
             sensorsList.forEach(function (item, key) {
                 if(item && item.id && item.id === pointData.id){
@@ -75,10 +83,10 @@ class Panel extends React.PureComponent {
                             data: data
                         })
                         localStorage.setItem('sensors_values', JSON.stringify(sensorsList))
-                        this.setState({
-                            ...this.state,
+                        this.props.onStorageAdd({ 
+                            ...this.props,
                             pointValues: data
-                        })
+                        })   
                     })
                     .catch((err) => { 
                         console.log(err) 
@@ -96,6 +104,7 @@ class Panel extends React.PureComponent {
             onClose={this.onClose}
             visible={drawerVisible}>   
             {box1}    
+            {box2}
             </StyledDrawer>   
     }
 }
@@ -112,6 +121,12 @@ const mapDispatchToProps = dispatch => ({
     onHideDrawer: (drawer) => {
         dispatch({
             type: 'HIDE_DRAWER',
+            payload: drawer
+        })
+    },
+    onStorageAdd: (drawer) => {
+        dispatch({
+            type: 'STORAGE_ADDED',
             payload: drawer
         })
     }

@@ -10,6 +10,8 @@ const mainReducer = (state = initialState, action) => {
             return action.payload
         case 'HIDE_DRAWER':
             return action.payload
+        case 'STORAGE_ADDED':
+            return action.payload
         default:
             return state
     }

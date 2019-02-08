@@ -32,7 +32,7 @@ const StyledDrawer = styled(Drawer)`
     }
     .indicator{
         display: inline-block;
-        font-size: 25px;
+        font-size: 35px;
         font-weight: bolder;
         margin-right: 10px;
     }
@@ -46,6 +46,14 @@ const StyledDrawer = styled(Drawer)`
         border-radius: 10px;
         user-select: none;
         cursor: default;
+        margin-bottom: 24px;
+        &.coloured{
+            color: #fff;
+        }
+        .avatar-logo{
+            display: inline-block;
+            margin-right: 10px;
+        }
     }
     .card-close{
         cursor: pointer;
