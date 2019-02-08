@@ -39,6 +39,7 @@ const StyledDrawer = styled(Drawer)`
     &.ant-drawer-open{
         .ant-drawer-content-wrapper{
             box-shadow: none;
+            height: auto;
         }
     }
     .ant-card {
