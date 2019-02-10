@@ -9,6 +9,15 @@ const Option = Select.Option
 const apiKey = 'RpCwq0GvuDZChatIBURhGTvmmK4ek4EZ'
 
 class Rightpanel extends React.PureComponent {  
+    sensorSelect = React.createRef()
+    state = ({
+        searchCurrent: 'Start typing to search'
+    })
+
+    clearSelect = () => {
+        
+    }
+
     handleChange = e => {
         let sensorsList = JSON.parse(localStorage.getItem('sensors'))
         let sensorExists = false
@@ -56,8 +65,15 @@ class Rightpanel extends React.PureComponent {
     render() {
         let sensorsList = JSON.parse(localStorage.getItem('sensors'))
        
-        return <StyledRightbar defaultValue="" style={{ width: 220 }} onChange={this.handleChange}>
-            <Option value="" key="">Choose sensor from list</Option>
+        return <StyledRightbar
+            defaultValue={this.state.searchCurrent} 
+            style={{ width: 220 }} 
+            onChange={this.handleChange}
+            showSearch
+            onBlur={this.clearSelect}
+            ref={this.sensorSelect}
+            filterOption={(input, option) => option.props.children && option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >           
             {sensorsList.map((sensor, index) => {
                 return <Option value={sensor.id} key={index}>{sensor.address.displayAddress2 ? sensor.address.displayAddress2 : sensor.address.displayAddress1}</Option>
             })}
