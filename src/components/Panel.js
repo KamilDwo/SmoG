@@ -44,7 +44,7 @@ class Panel extends React.PureComponent {
                 const preParam2 = (sensorsList[sensorIndex] ? sensorsList[sensorIndex].data.current : pointValues.current)
 
                 box1 = <Card
-                    title={pointData.address.displayAddress2}
+                    title={pointData.address.displayAddress2 ? pointData.address.displayAddress2 : pointData.address.displayAddress1}
                     size="small"
                     extra={<span className="card-close" onClick={this.onClose}>Close</span>}>
                         <div className="avatar-logo">

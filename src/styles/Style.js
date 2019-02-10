@@ -7,6 +7,11 @@ body {
     margin: 0;
     padding: 0;
     background-color: #fff;
+    @media (max-width: 650px){
+        .leaflet-control-zoom{
+            display: none;
+        }
+    }
 }`
 
 
@@ -28,9 +33,6 @@ const StyledRightbar = styled(Select)`
     right: 24px;
     top: 24px;
     z-index: 401;
-    @media (max-width: 650px){
-        right: 54px;
-    }
 }`
 
 const StyledDrawer = styled(Drawer)`
@@ -50,8 +52,7 @@ const StyledDrawer = styled(Drawer)`
     &.ant-drawer-open{
         .ant-drawer-content-wrapper{
             box-shadow: none;
-            @media (max-width: 650px){
-                width: calc(100% - 30px) !important;
+            @media (max-width: 650px){                
                 margin-top: 75px;
                 padding-bottom: 75px;
             }

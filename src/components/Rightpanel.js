@@ -59,7 +59,7 @@ class Rightpanel extends React.PureComponent {
         return <StyledRightbar defaultValue="" style={{ width: 220 }} onChange={this.handleChange}>
             <Option value="" key="">Choose sensor from list</Option>
             {sensorsList.map((sensor, index) => {
-                return <Option value={sensor.id} key={index}>{sensor.address.displayAddress2}</Option>
+                return <Option value={sensor.id} key={index}>{sensor.address.displayAddress2 ? sensor.address.displayAddress2 : sensor.address.displayAddress1}</Option>
             })}
         </StyledRightbar>
     }

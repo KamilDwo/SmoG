@@ -82,6 +82,7 @@ class Map extends React.PureComponent {
     }
 
     componentDidMount() {
+        let sensorsList = JSON.parse(localStorage.getItem('sensors'))
         this.mapElement = L.map('map', {
             center: [50.049683, 19.944544],
             zoom: 13,
@@ -98,10 +99,18 @@ class Map extends React.PureComponent {
         
         axios.get(`https://airapi.airly.eu/v2/installations/nearest?lat=50.049683&lng=19.944544&maxDistanceKM=30&maxResults=-1&apikey=${apiKey}`)
         .then(({ data }) => {
-            this.setState({
-                ...this.state,
-                avaiblePoints: data
-            })
+            if(sensorsList.length !== data.length){
+                localStorage.setItem('sensors', JSON.stringify(data))
+                this.setState({
+                    ...this.state,
+                    avaiblePoints: data
+                })
+            } else {
+                this.setState({
+                    ...this.state,
+                    avaiblePoints: data
+                })
+            }
         })
         .catch((err) => { 
             console.log(err) 
