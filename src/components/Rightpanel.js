@@ -14,7 +14,8 @@ class Rightpanel extends React.PureComponent {
     searchCurrent: "Start typing to search",
     showPositionBtn: false,
     positionBtnLoading: false,
-    positionBtnSuccess: false
+    positionBtnSuccess: false,
+    clearSelect: false
   };
 
   componentDidMount() {
@@ -37,13 +38,15 @@ class Rightpanel extends React.PureComponent {
     }
   }
 
-  clearSelect = () => {};
-
   localizeMe = () => {
     this.setState({
       ...this.state,
       positionBtnLoading: true,
       positionBtnSuccess: false
+    });
+    this.props.onHideDrawer({
+      drawerVisible: false,
+      pointData: null
     });
     setTimeout(() => {
       navigator.geolocation.getCurrentPosition(location => {
@@ -64,7 +67,8 @@ class Rightpanel extends React.PureComponent {
       this.setState({
         ...this.state,
         positionBtnLoading: false,
-        positionBtnSuccess: true
+        positionBtnSuccess: true,
+        clearSelect: true
       });
     }, 2000);
   };
@@ -100,7 +104,10 @@ class Rightpanel extends React.PureComponent {
         );
         this.props.onShowDrawer({
           drawerVisible: true,
-          pointData: sensorsList[sensorIndex]
+          pointData: sensorsList[sensorIndex],
+          currentPoint: sensorsList[sensorIndex].address.displayAddress2
+            ? sensorsList[sensorIndex].address.displayAddress2
+            : sensorsList[sensorIndex].address.displayAddress1
         });
       }
     } else {
@@ -109,7 +116,10 @@ class Rightpanel extends React.PureComponent {
         .then(({ data }) => {
           this.props.onShowDrawer({
             drawerVisible: true,
-            pointData: data
+            pointData: data,
+            currentPoint: data.address.displayAddress2
+              ? data.address.displayAddress2
+              : data.address.displayAddress1
           });
           sensorsList.push(data);
           localStorage.setItem("sensors", JSON.stringify(sensorsList));
@@ -123,14 +133,16 @@ class Rightpanel extends React.PureComponent {
   render() {
     const { positionBtnLoading, positionBtnSuccess } = this.state;
     let sensorsList = JSON.parse(localStorage.getItem("sensors"));
+    const { currentPoint } = this.props;
 
     return (
       <StyledRightbar>
         <Select
-          defaultValue={this.state.searchCurrent}
+          placeholder="Start type to search"
           style={{ width: 220 }}
           onChange={this.handleChange}
           showSearch
+          value={currentPoint ? currentPoint : "Start type to search"}
           size="large"
           onBlur={this.clearSelect}
           ref={this.sensorSelect}

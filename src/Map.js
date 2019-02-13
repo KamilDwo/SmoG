@@ -7,6 +7,7 @@ import "antd/dist/antd.css";
 import StoredPanel from "./components/Panel";
 import { connect } from "react-redux";
 import StoredRightpanel from "./components/Rightpanel";
+require("dotenv").config();
 
 let greenIcon = L.icon({
   iconUrl: "images/marker-icon.png",
@@ -14,13 +15,19 @@ let greenIcon = L.icon({
   popupAnchor: [-12, -40]
 });
 
-const apiKey = "RpCwq0GvuDZChatIBURhGTvmmK4ek4EZ";
+const { REACT_APP_AIRLY_KEY } = process.env;
+const apiKey = REACT_APP_AIRLY_KEY;
+let sensorsList = JSON.parse(localStorage.getItem("sensors"));
+let location = JSON.parse(localStorage.getItem("location"));
 
 if (!localStorage.getItem("sensors")) {
   localStorage.setItem("sensors", "[]");
 }
 if (!localStorage.getItem("sensors_values")) {
   localStorage.setItem("sensors_values", "[]");
+}
+if (!localStorage.getItem("data_lastupdate")) {
+  localStorage.setItem("data_lastupdate", Date.now());
 }
 
 class Map extends React.PureComponent {
@@ -43,12 +50,50 @@ class Map extends React.PureComponent {
 
   popupStyleError = address => {
     return `<h3>${address}</h3>
-        Ten czujnik jest aktualnie nieaktywny.`;
+        This sensor is not active.`;
+  };
+
+  updateData = sensorId => {
+    let sensorIndex = sensorsList.findIndex(function(sensor) {
+      return sensor.id === sensorId;
+    });
+    let checkDifference;
+    let minutes;
+    if (localStorage.getItem("data_lastupdate")) {
+      if (sensorsList[sensorIndex].last_update) {
+        checkDifference = Math.abs(
+          new Date() -
+            new Date(JSON.parse(localStorage.getItem("data_lastupdate")))
+        );
+        minutes = Math.floor(checkDifference / 1000 / 60);
+      } else {
+        minutes = 31;
+      }
+      if (minutes && minutes > 30) {
+        if (sensorIndex) {
+          axios
+            .get(
+              `https://airapi.airly.eu/v2/installations/${sensorId}?apikey=${apiKey}`
+            )
+            .then(({ data }) => {
+              this.props.onShowDrawer({
+                drawerVisible: true,
+                pointData: data
+              });
+              sensorsList[sensorIndex] = data;
+              sensorsList[sensorIndex].last_update = new Date();
+              localStorage.setItem("sensors", JSON.stringify(sensorsList));
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        }
+      }
+    }
   };
 
   onMarkerClick = marker => {
     const { options } = marker.target;
-    let sensorsList = JSON.parse(localStorage.getItem("sensors"));
     let sensorExists = false;
 
     sensorsList.forEach(function(item, key) {
@@ -57,7 +102,7 @@ class Map extends React.PureComponent {
       }
     });
 
-    this.mapElement.setView([options.location.lat, options.location.lng], 15);
+    this.mapElement.flyTo([options.location.lat, options.location.lng], 15);
     if (!sensorExists) {
       axios
         .get(
@@ -72,6 +117,11 @@ class Map extends React.PureComponent {
           });
           sensorsList.push(data);
           localStorage.setItem("sensors", JSON.stringify(sensorsList));
+          this.props.onSetCurrentpoint({
+            currentPoint: data.address.displayAddress2
+              ? data.address.displayAddress2
+              : data.address.displayAddress1
+          });
         })
         .catch(err => {
           console.log(err);
@@ -80,19 +130,24 @@ class Map extends React.PureComponent {
       let sensorIndex = sensorsList.findIndex(function(sensor) {
         return sensor.id === options.installationId;
       });
+
+      this.updateData(options.installationId);
+
       if (sensorIndex) {
         this.props.onShowDrawer({
           drawerVisible: true,
           pointData: sensorsList[sensorIndex]
+        });
+        this.props.onSetCurrentpoint({
+          currentPoint: sensorsList[sensorIndex].address.displayAddress2
+            ? sensorsList[sensorIndex].address.displayAddress2
+            : sensorsList[sensorIndex].address.displayAddress1
         });
       }
     }
   };
 
   componentDidMount() {
-    let sensorsList = JSON.parse(localStorage.getItem("sensors"));
-    let location = JSON.parse(localStorage.getItem("location"));
-
     this.mapElement = L.map("map", {
       center: [50.049683, 19.944544],
       zoom: 13,
@@ -149,7 +204,6 @@ class Map extends React.PureComponent {
   componentDidUpdate() {
     const { avaiblePoints } = this.state;
     const { flyMyLocation } = this.props;
-    let location = JSON.parse(localStorage.getItem("location"));
 
     if (flyMyLocation && location) {
       let myMarker = L.marker([location.lat, location.lng], {
@@ -157,7 +211,7 @@ class Map extends React.PureComponent {
         maxWidth: 200,
         minWidth: 200
       }).addTo(this.mapElement);
-      this.mapElement.setView([location.lat, location.lng], 15);
+      this.mapElement.flyTo([location.lat, location.lng], 15);
       myMarker
         .bindTooltip("My position", {
           direction: "top",
@@ -165,6 +219,9 @@ class Map extends React.PureComponent {
           permanent: true
         })
         .openTooltip();
+      this.props.onFlyToLocation({
+        flyMyLocation: false
+      });
     }
 
     if (avaiblePoints.length && avaiblePoints.length > 0) {
@@ -176,7 +233,9 @@ class Map extends React.PureComponent {
           [point.location.latitude, point.location.longitude],
           {
             icon: greenIcon,
-            address: point.address.displayAddress2,
+            address: point.address.displayAddress2
+              ? point.address.displayAddress2
+              : point.address.displayAddress1,
             maxWidth: 200,
             minWidth: 200,
             installationId: point.id,
@@ -214,6 +273,18 @@ const mapDispatchToProps = dispatch => ({
     dispatch({
       type: "SHOW_DRAWER",
       payload: drawer
+    });
+  },
+  onFlyToLocation: payload => {
+    dispatch({
+      type: "FLY_TO_LOCATION",
+      payload: payload
+    });
+  },
+  onSetCurrentpoint: payload => {
+    dispatch({
+      type: "SET_CURRENT",
+      payload: payload
     });
   }
 });
