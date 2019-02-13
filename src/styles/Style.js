@@ -63,23 +63,26 @@ const StyledDrawer = styled(Drawer)`
       font-weight: bolder;
       margin-right: 10px;
     }
-  
+    .ant-drawer-content-wrapper {
+      box-shadow: none;
+      @media (max-width: 650px) {
+        top: 75px;
+        padding-bottom: 75px;
+      }
+      @media (max-width: 480px) {
+        width: 100% !important;
+      }
+    }
+    &.ant-drawer-open {
       .ant-drawer-content-wrapper {
         box-shadow: none;
-        @media (max-width: 650px) {
-          top: 75px;
-          padding-bottom: 75px;
-        }
-        @media (max-width: 480px) {
-          width: 100% !important;
-        }
       }
-      .ant-drawer-body {
-        @media (max-width: 650px) {
-          padding-top: 0;
-        }
+    }
+    .ant-drawer-body {
+      @media (max-width: 650px) {
+        padding-top: 0;
       }
-  
+    }
     .chart-title {
       display: block;
       width: 100%;
