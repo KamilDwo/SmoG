@@ -63,11 +63,11 @@ const StyledDrawer = styled(Drawer)`
       font-weight: bolder;
       margin-right: 10px;
     }
-    &.ant-drawer-open {
+  
       .ant-drawer-content-wrapper {
         box-shadow: none;
         @media (max-width: 650px) {
-          margin-top: 75px;
+          top: 75px;
           padding-bottom: 75px;
         }
         @media (max-width: 480px) {
@@ -79,7 +79,7 @@ const StyledDrawer = styled(Drawer)`
           padding-top: 0;
         }
       }
-    }
+  
     .chart-title {
       display: block;
       width: 100%;
